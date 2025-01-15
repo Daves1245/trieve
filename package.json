@@ -1,0 +1,31 @@
+{
+  "name": "trieve",
+  "version": "1.0.0",
+  "private": true,
+  "main": "index.js",
+  "workspaces": [
+    "frontends/search",
+    "frontends/chat",
+    "frontends/dashboard",
+    "frontends/shared",
+    "frontends/config",
+    "clients/ts-sdk",
+    "clients/search-component",
+    "clients/mcp-server"
+  ],
+  "scripts": {
+    "dev": "turbo dev --filter=\"./frontends/**\"",
+    "build": "turbo build --filter=\"./frontends/**\"",
+    "build:clean-client": "./convenience.sh -c",
+    "lint": "turbo lint --filter=\"./frontends/**\"",
+    "lint:CI": "turbo lint:CI --filter=\"./frontends/**\"",
+    "typecheck": "turbo typecheck --filter=\"./frontends/**\""
+  },
+  "repository": "git@github.com:devflowinc/trieve.git",
+  "author": "Drew Harris <harrisd@smu.edu>",
+  "license": "MIT",
+  "devDependencies": {
+    "turbo": "^2.0.4"
+  },
+  "packageManager": "yarn@1.22.22"
+}

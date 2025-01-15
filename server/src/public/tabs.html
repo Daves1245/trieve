@@ -1,0 +1,67 @@
+<template id="tab-template">
+  {% include "search-component-code.html" %}
+</template>
+<div class="max-w-full">
+  <div
+    id="tab-container"
+    class="mx-auto px-4 py-16 sm:px-6 sm:py-24 lg:max-w-7xl lg:px-8"
+  >
+    <div id="tab-header">
+      <div id="tab-buttons">
+        {% for tab in tabs %}
+        <button class="tab-button" data-tab-id="{{ tab.title }}">
+          {{ tab.title }}
+        </button>
+        {% endfor %}
+      </div>
+    </div>
+    <div id="tab-content">
+      <div class="tab-content flex flex-col gap-4"></div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  window.tabData = {{ tabs | tojson }};
+
+  function setOpenTab(tabIndex) {
+    const tabButtonsCarousel = document.querySelector('#tab-buttons');
+    const tabButtons = document.querySelectorAll('.tab-button');
+    tabButtons.forEach((tabButton, index) => {
+      if (index === tabIndex) {
+        tabButton.classList.add('active');
+        tabButtonsCarousel.scrollTo({
+          left: tabButton.offsetLeft - tabButtonsCarousel.offsetWidth / 2 + tabButton.offsetWidth / 2,
+          behavior: 'smooth',
+        });
+      } else {
+        tabButton.classList.remove('active');
+      }
+    });
+    const tabContent = document.querySelector('.tab-content');
+    tabContent.innerHTML = window.tabData[tabIndex].tabInnerHtml;
+    let tab = window.tabData[tabIndex];
+    if (tab.showComponentCode) {
+      let template = document.getElementById('tab-template');
+      let clone = template.content.cloneNode(true);
+      tabContent.appendChild(clone);
+      hljs.highlightAll();
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    urlParams.set('tab', tabIndex);
+    window.history.replaceState({}, '', `${window.location.pathname}?${urlParams}`);
+  }
+
+  const buttons = document.querySelectorAll('.tab-button');
+  buttons.forEach((button, index) => {
+    button.addEventListener('click', () => {
+      setOpenTab(index);
+    });
+  });
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const tabIndex = Number(urlParams.get('tab')) || 0;
+
+  setOpenTab(tabIndex);
+</script>

@@ -1,0 +1,388 @@
+<div class="max-w-full">
+  <div
+    id="product-display"
+    class="mx-auto mt-10 sm:mt-12 lg:mt-14 py-4 px-4 sm:px-6 lg:max-w-7xl lg:px-8"
+  >
+    {% if params.singleProductOptions.productDescriptionHtml %}
+    <section class="lg:flex gap-4 lg:gap-x-8 lg:gap-y-10 xl:gap-x-16 py-2">
+      <div class="lg:w-1/2">
+        <img
+          src="{{ params.singleProductOptions.productPrimaryImageUrl }}"
+          alt="View of product."
+          class="aspect-4/3 w-full rounded-lg bg-gray-100 object-cover max-h-80 sm:max-h-[30rem]"
+        />
+      </div>
+
+      <div class="mx-auto mt-4 lg:mt-0 lg:w-1/2">
+        <h1
+          class="text-brand-color text-2xl font-bold tracking-tight sm:text-3xl"
+        >
+          {{ params.singleProductOptions.productName }}
+        </h1>
+
+        {% if params.videoLink and params.videoPosition == "product" %}
+        <div class="product-video-wrapper">
+          <iframe
+            src="{{params.videoLink}}"
+            frameborder="0"
+            allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen
+          >
+          </iframe>
+        </div>
+        {% else %}
+        <div class="mt-2 text-gray-500 paragraph-text">
+          {{ params.singleProductOptions.productDescriptionHtml|safe }}
+        </div>
+        {% endif %} {% if params.inline and params.singleProductOptions and
+        params.singleProductOptions.productName %}
+        <div id="inline-root"></div>
+        {% else %}
+        <div class="mt-4 border-t border-gray-200">
+          <h3 class="text-brand-color text-sm font-medium mt-4">
+            <span class="text-brand-color"
+              ><i class="fa-solid fa-wand-magic-sparkles"></i
+            ></span>
+            Ask AI
+          </h3>
+          <div class="starter-questions flex flex-wrap gap-1 mt-2">
+            {% for question in params.singleProductOptions.productQuestions %}
+            <button
+              type="button"
+              class="px-3 py-1.5 text-sm rounded-lg text-brand-color"
+            >
+              {{ question }}
+            </button>
+            {% endfor %}
+            <button
+              type="button"
+              class="bg-brand-color px-3 py-1.5 text-sm rounded-lg text-white"
+            >
+              Ask something else
+            </button>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </section>
+    {% endif %} {% if params.singleProductOptions.recSearchQuery %}
+    <section
+      aria-labelledby="related-heading"
+      class="border-t border-gray-200 mt-4"
+    >
+      <div class="recs-section">
+        <h2
+          id="related-heading"
+          class="text-brand-color text-xl font-bold mt-8 w-fit"
+        >
+          Products Related to {{ params.singleProductOptions.productName }}
+        </h2>
+        <h4 class="text-sm text-gray-500 mt-2 w-fit">
+          Tailored to user history. AI automatically optimizes conversions.
+        </h4>
+
+        <div
+          class="recs mt-6 flex flex-nowrap overflow-x-auto gap-x-4 sm:gap-x-6 xl:gap-x-8 py-2"
+        >
+          {% for i in range(5) %}
+          <div class="mt-auto w-64 flex-shrink-0" x-key="{{ i }}">
+            <div class="w-full overflow-hidden rounded-lg">
+              <div class="h-full w-full bg-gray-200 animate-pulse"></div>
+            </div>
+            <div class="mt-4">
+              <div class="h-4 w-2/3 bg-gray-200 rounded animate-pulse"></div>
+              <div
+                class="mt-1 h-4 w-1/2 bg-gray-200 rounded animate-pulse"
+              ></div>
+            </div>
+            <div class="mt-6">
+              <div
+                class="w-full cursor-not-allowed h-10 bg-gray-200 rounded-md animate-pulse"
+              ></div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+    {% endif %}
+  </div>
+</div>
+<script type="module">
+  const setProductsToLoadingState = (idsToKeep) => {
+    const recs = document.querySelector(".recs");
+    const recProducts = recs.querySelectorAll(":scope > .rec");
+    recProducts.forEach((recProduct, i) => {
+      if (!idsToKeep.includes(recProduct.getAttribute("x-group-tracking-id"))) {
+        const newDiv = document.createElement("div");
+        newDiv.classList.add("w-64", "flex-shrink-0", "mt-auto");
+        newDiv.setAttribute("x-key", i);
+        newDiv.innerHTML = `
+          <div class="w-full overflow-hidden rounded-lg">
+            <div class="h-full w-full bg-gray-200 animate-pulse"></div>
+          </div>
+          <div class="mt-4">
+            <div class="h-4 w-2/3 bg-gray-200 rounded animate-pulse"></div>
+            <div
+              class="mt-1 h-4 w-1/2 bg-gray-200 rounded animate-pulse"
+            ></div>
+          </div>
+          <div class="mt-6">
+            <div
+              class="w-full cursor-not-allowed h-10 bg-gray-200 rounded-md animate-pulse"
+            ></div>
+          </div>
+        `;
+
+        recs.replaceChild(newDiv, recProduct);
+      }
+    });
+  };
+
+  const getGroupRecommendations = async (
+    positiveGroupTrackingIds,
+    negativeGroupTrackingIds
+  ) => {
+    const recommendations = await fetch(
+      `${window.paramsData.baseUrl}/api/chunk_group/recommend`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + window.paramsData.apiKey,
+          "TR-Dataset": window.paramsData.datasetId,
+        },
+        body: JSON.stringify({
+          group_size: 1,
+          limit:
+            12 -
+            (positiveGroupTrackingIds.length + negativeGroupTrackingIds.length),
+          positive_group_tracking_ids: positiveGroupTrackingIds.length
+            ? positiveGroupTrackingIds
+            : [window.paramsData.singleProductOptions.groupTrackingId],
+          negative_group_tracking_ids: negativeGroupTrackingIds,
+        }),
+        credentials: "omit",
+      }
+    );
+
+    const recommendationsData = await recommendations.json();
+
+    replaceLoadingStateProducts(recommendationsData.results);
+    setRecProductEventListeners();
+  };
+
+  const setRecProductEventListeners = () => {
+    const recProducts = document.querySelectorAll(".rec");
+    recProducts.forEach((recProduct) => {
+      recProduct
+        .querySelectorAll(".similar-button , .different-button")
+        .forEach((button) => {
+          const newButton = button.cloneNode(true);
+          button.replaceWith(newButton);
+
+          newButton.addEventListener("click", () => {
+            const isActive = newButton.classList.contains("active");
+            newButton.classList.toggle("active");
+            newButton
+              .closest(".rec")
+              .querySelectorAll(".rec-button")
+              .forEach((otherButton) => {
+                if (otherButton !== newButton) {
+                  otherButton.classList.remove("active");
+                }
+              });
+
+            let curWindowRecData = window.recData;
+            if (!curWindowRecData) {
+              curWindowRecData = {};
+            }
+            const field = newButton.classList.contains("similar-button")
+              ? "positiveGroupTrackingIds"
+              : "negativeGroupTrackingIds";
+            if (!curWindowRecData[field]) {
+              curWindowRecData[field] = [];
+            }
+
+            const oppositeField = newButton.classList.contains("similar-button")
+              ? "negativeGroupTrackingIds"
+              : "positiveGroupTrackingIds";
+            curWindowRecData[oppositeField] = curWindowRecData[
+              oppositeField
+            ]?.filter(
+              (id) => id !== recProduct.getAttribute("x-group-tracking-id")
+            );
+
+            if (isActive) {
+              curWindowRecData[field] = curWindowRecData[field].filter(
+                (id) => id !== recProduct.getAttribute("x-group-tracking-id")
+              );
+            } else {
+              curWindowRecData[field].push(
+                recProduct.getAttribute("x-group-tracking-id")
+              );
+            }
+            window.recData = curWindowRecData;
+
+            setProductsToLoadingState([
+              ...(window.recData.positiveGroupTrackingIds ?? []),
+              ...(window.recData.negativeGroupTrackingIds ?? []),
+              recProduct.getAttribute("x-group-tracking-id"),
+            ]);
+            getGroupRecommendations(
+              window.recData.positiveGroupTrackingIds ?? [],
+              window.recData.negativeGroupTrackingIds ?? []
+            );
+          });
+        });
+    });
+  };
+
+  const replaceLoadingStateProducts = (results) => {
+    const recDivs = [];
+    for (const result of results) {
+      const groupTrackingId = result.group.tracking_id;
+      const chunk = result.chunks.length ? result.chunks[0]?.chunk : null;
+      if (!chunk) {
+        continue;
+      }
+
+      const imageUrl = chunk.image_urls?.length
+        ? chunk.image_urls[0]
+        : chunk.metadata.images?.length
+          ? chunk.metadata.images[0].src
+          : null;
+      if (!imageUrl) {
+        continue;
+      }
+
+      const chunkHtmlElement = document.createElement("div");
+      chunkHtmlElement.innerHTML = chunk.chunk_html;
+      const firstHeading = chunkHtmlElement.querySelector(
+        "h1, h2, h3, h4, h5, h6"
+      );
+      if (firstHeading) {
+        firstHeading.remove();
+      }
+      const title = firstHeading?.textContent || chunk.metadata.title;
+      if (!title) {
+        continue;
+      }
+
+      const sentences = chunkHtmlElement.textContent.split(/[.,!?]+/);
+      const description = chunkHtmlElement.textContent;
+
+      const priceNum =
+        chunk.num_value || chunk.metadata.variants?.length
+          ? chunk.metadata.variants[0].price
+            ? parseFloat(chunk.metadata.variants[0].price)
+            : null
+          : null;
+      const price = priceNum ? `$${priceNum.toFixed(2)}` : null;
+
+      const chunkElement = document.createElement("div");
+      chunkElement.classList.add(
+        ...["rec", "w-64", "flex-shrink-0", "mt-auto"]
+      );
+      chunkElement.setAttribute("x-group-tracking-id", groupTrackingId);
+      chunkElement.innerHTML = `
+        <div
+          class="w-full overflow-hidden rounded-lg"
+        >
+          <img
+            src="${imageUrl}"
+            alt="${title}"
+            class="rec-image max-h-[380px] w-full object-cover"
+          />
+        </div>
+        <div class="mt-4">
+          <a href="${chunk.link}" target="_blank" class="text-brand-color line-clamp-1 text-sm font-medium">${title}</a>
+          <h6 class="rec-price mt-1 text-sm text-gray-700">${price}</h6>
+          <p class="rec-description line-clamp-1 mt-1 text-sm text-gray-500">${description}</p>
+        </div>
+        <div class="mt-6 flex gap-2">
+          <button
+            class="similar-button rec-button bg-brand-color w-1/2 flex items-center justify-center rounded-md border border-transparent px-1 py-2 text-sm font-medium text-white"
+          >
+            More Like This
+          </button>
+          <button
+            class="different-button rec-button bg-brand-color w-1/2 flex items-center justify-center rounded-md border border-transparent px-1 py-2 text-sm font-medium text-white"
+          >
+            Less Like This
+          </button>
+        </div>
+      `;
+
+      recDivs.push(chunkElement);
+    }
+
+    const recs = document.querySelector(".recs");
+    recs.querySelectorAll(":scope > div:not(.rec)").forEach((div) => {
+      recs.replaceChild(recDivs.pop(), div);
+    });
+  };
+
+  const recommendations = await fetch(
+    `${window.paramsData.baseUrl}/api/chunk_group/group_oriented_search`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + window.paramsData.apiKey,
+        "TR-Dataset": window.paramsData.datasetId,
+      },
+      body: JSON.stringify({
+        query: window.paramsData.singleProductOptions.recSearchQuery,
+        use_quote_negated_terms: true,
+        search_type: "semantic",
+        group_size: 1,
+        page_size: 15,
+      }),
+      credentials: "omit",
+    }
+  );
+  const recommendationsData = await recommendations.json();
+
+  replaceLoadingStateProducts(recommendationsData.results);
+  setRecProductEventListeners();
+</script>
+<script type="module">
+  const getGroupByTrackingIdResp = await fetch(
+    `${window.paramsData.baseUrl}/api/chunk_group/tracking_id/${window.paramsData.singleProductOptions.groupTrackingId}`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + window.paramsData.apiKey,
+        "TR-Dataset": window.paramsData.datasetId,
+      },
+      credentials: "omit",
+    }
+  );
+  const group = await getGroupByTrackingIdResp.json();
+
+  const starterQuestions = document.querySelectorAll(
+    ".starter-questions button"
+  );
+  starterQuestions.forEach((button) => {
+    button.addEventListener("click", async () => {
+      const message =
+        button.textContent.trim() === "Ask something else"
+          ? null
+          : button.textContent.trim();
+      const betterGroupName =
+        window.paramsData.singleProductOptions.productName;
+
+      window.dispatchEvent(
+        new CustomEvent("trieve-start-chat-with-group", {
+          detail: {
+            group,
+            betterGroupName,
+            message,
+          },
+        })
+      );
+    });
+  });
+</script>

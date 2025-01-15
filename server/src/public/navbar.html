@@ -1,0 +1,69 @@
+<nav class="border-b">
+  <div
+    class="max-w-screen-2xl mx-auto w-full py-2 px-4 flex items-center justify-center flex-col gap-2 sm:gap-4 sm:justify-between sm:!flex-row md:gap-4 lg:gap-6"
+  >
+    <a class="flex items-center" href="https://trieve.ai">
+      <img
+        class="corner-logo"
+        src="{{params.navLogoImgSrcUrl|safe if (params.navLogoImgSrcUrl is defined and params.navLogoImgSrcUrl) else 'https://cdn.trieve.ai/trieve-logo.png'|safe}}"
+      />
+    </a>
+    <div class="text-center max-w-[calc(100%-4rem)]">
+      <p class="font-medium text-2xl">
+        {{params.headingPrefix|safe if (params.headingPrefix is defined and
+        params.headingPrefix) else 'Demo For'|safe}}
+        <span class="brand-name font-medium">
+          {{params.forBrandName|safe if (params.forBrandName is defined and
+          params.forBrandName) else 'Prospect'|safe}}
+        </span>
+      </p>
+      <p class="signature mt-1 pl-0.5 text-right text-sm hidden sm:block">
+        - From
+        <a
+          class="creator"
+          target="_blank"
+          href="{{params.creatorLinkedInUrl|safe if (params.creatorLinkedInUrl is defined and params.creatorLinkedInUrl) else 'https://www.linkedin.com/company/trieveai'|safe}}"
+        >
+          {{params.creatorName|safe if (params.creatorName is defined and
+          params.creatorName) else 'Nick K, CEO'|safe}}
+        </a>
+        @
+        <a class="trieve-company-name" target="_blank" href="https://trieve.ai">
+          Trieve
+        </a>
+      </p>
+    </div>
+    <div class="flex-1"></div>
+    <div
+      id="nav-links"
+      class="flex flex-wrap items-center gap-3 sm:gap-4 justify-center sm:justify-right -mt-1 sm:mt-0"
+    >
+      <a
+        class="flex items-center gap-1"
+        target="_blank"
+        href="https://cal.com/nick.k"
+      >
+        <i class="fa-regular fa-calendar mb-0.5"></i>
+        <span> Talk to Sales </span>
+      </a>
+      <a target="_blank" href="mailto:humans@trieve.ai">
+        <i class="fa-regular fa-envelope"></i>
+      </a>
+      <a target="_blank" href="tel:+16282224090">
+        <i class="fa-solid fa-phone"></i>
+      </a>
+      <a
+        target="_blank"
+        href="https://join.slack.com/t/trievecommunityslack/shared_invite/zt-2v7zyxytf-zWLVgqI8avB5x5Br7INQgw"
+      >
+        <i class="fa-brands fa-slack"></i>
+      </a>
+      <a target="_blank" href="https://www.linkedin.com/company/trieveai">
+        <i class="fa-brands fa-linkedin-in"></i>
+      </a>
+      <button id="tr-search-icon">
+        <i class="fa-solid fa-magnifying-glass"></i>
+      </button>
+    </div>
+  </div>
+</nav>
